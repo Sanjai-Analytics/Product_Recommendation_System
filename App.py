@@ -7,16 +7,15 @@ import plotly.express as px
 import seaborn as sns
 import matplotlib.pyplot as plt
 
-# --- Page Configuration ---
+# Page Configuration
 st.set_page_config(page_title="Mobile Phone Recommender", layout="wide")
 
-# --- Data Loading & Preprocessing ---
-# Using @st.cache_data ensures the CSV is only loaded once, making the app blazing fast
+# Data Loading & Preprocessing 
 @st.cache_data
 def load_data():
     df = pd.read_csv("Cleaned_Mobile_Phones_Dataset.csv")
     
-    # Clean up residual columns if they exist in your saved CSV
+    
     cols_to_drop = ['age', 'language']
     df = df.drop(columns=[col for col in cols_to_drop if col in df.columns])
     
@@ -29,7 +28,6 @@ def load_data():
     df['budget_range'] = pd.cut(df['price_usd'], bins=bins, labels=labels, include_lowest=True)
     
     # 3. PREPARE THE DATA FOR COSINE SIMILARITY
-    # Select exactly which features define a phone mathematically
     categorical_col = ['brand', 'country', 'source'] 
     numerical_col = ['price_usd', 'rating', 'sentiment', 'battery_life_rating', 'camera_rating', 
                      'performance_rating', 'design_rating', 'display_rating']
@@ -46,10 +44,10 @@ def load_data():
     
     return df, df_final
 
-# Unpack both dataframes so your app can use them!
+
 df, df_final = load_data()
 
-# --- UI Layout ---
+# UI Layout 
 st.title("Intelligent Mobile Phone Recommender")
 st.markdown("Find the perfect, highly-rated phone available in your region.")
 
@@ -84,7 +82,7 @@ with tab1:
         selected_budget = st.selectbox("Select Your Price Range", budgets)
         st.info(f"Looking for phones priced **{selected_budget}** available in **{selected_country}** on **{selected_source}**...")
     
-        # --- TODO 1: Pandas filtering and display logic ---
+    
     
         # 1. Filter by Region, Source, and the User's chosen Budget
         filtered_df = df[
@@ -116,7 +114,6 @@ with tab1:
         models = sorted(df['model'].dropna().unique())
         selected_model = st.selectbox("Select a Phone Model", models)
     
-        # --- Target-price lookup and recommendation logic ---
         target_data = df[df['model'] == selected_model]
     
         if target_data.empty:
@@ -133,7 +130,7 @@ with tab1:
                 (df['country'] == selected_country) & 
                 (df['source'] == selected_source) & 
                 (df['budget_range'] == predicted_budget) &
-                (df['model'] != selected_model) # Exclude the target phone itself!
+                (df['model'] != selected_model) 
             ].index
         
             if len(valid_indices) == 0:
@@ -171,7 +168,7 @@ with tab1:
 with tab2:
     st.header("Exploratory Data Analysis")
     
-    # Requirement: Analyze product distribution across different brands and countries
+    
     st.subheader("Product Distribution by Brand")
     brand_counts = df['brand'].value_counts().reset_index()
     fig_brand = px.bar(brand_counts, x='brand', y='count', color='brand', title="Number of Reviews per Brand", text_auto=True)
